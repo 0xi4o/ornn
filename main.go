@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"os"
 
+	"github.com/0xi4o/ornn/log"
 	"github.com/spf13/cobra"
 )
 
@@ -13,6 +14,7 @@ type ProjectType struct {
 }
 
 var (
+	logger       log.Logger
 	projectTypes []ProjectType
 	version      = "0.1.0"
 
@@ -22,8 +24,11 @@ var (
 		// TODO: add a long description
 		// Long: ``,
 		RunE: func(cmd *cobra.Command, args []string) error {
+			logger = log.Initialize()
+			defer logger.Close()
+
 			if err := cmd.Usage(); err != nil {
-				return err
+				return fmt.Errorf("failed to print usage: %v", err)
 			}
 			return nil
 		},
