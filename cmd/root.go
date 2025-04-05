@@ -15,7 +15,6 @@ var rootCmd = &cobra.Command{
 	Short: "Go Fullstack Boilerplate Generator",
 	// TODO: add a long description
 	Long: ``,
-	// TODO: default should show usage
 	Run: func(cmd *cobra.Command, args []string) {
 		cmd.Usage()
 	},
