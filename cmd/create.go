@@ -8,34 +8,47 @@ import (
 	"github.com/spf13/cobra"
 )
 
-var createCmd = &cobra.Command{
-	Use:   "create",
-	Short: "Create a new project",
-	// Args:      cobra.MatchAll(cobra.ExactArgs(1), cobra.OnlyValidArgs),
-	// ValidArgs: []string{"app", "cli", "server"},
-	Run: func(cmd *cobra.Command, args []string) {
-		runCreate()
-	},
+type ProjectType struct {
+	Command     string
+	Description string
 }
 
 type CreateModel struct {
-	choices  map[int]Choice
+	choices  []ProjectType
 	cursor   int
 	selected int
 }
 
-type Choice struct {
-	label string
-	value string
+var (
+	createCmd = &cobra.Command{
+		Use:   "create",
+		Short: "Create a new project",
+		// Args:      cobra.MatchAll(cobra.ExactArgs(1), cobra.OnlyValidArgs),
+		// ValidArgs: []string{"app", "cli", "server"},
+		Run: func(cmd *cobra.Command, args []string) {
+			p := tea.NewProgram(model)
+			if _, err := p.Run(); err != nil {
+				fmt.Printf("Error running program: %v", err)
+				os.Exit(1)
+			}
+		},
+	}
+	model CreateModel
+)
+
+func GetProjectTypes() []ProjectType {
+	return []ProjectType{
+		{Command: "api", Description: "REST API server"},
+		{Command: "app", Description: "Fullstack Application with Go backend and React frontend"},
+		{Command: "cli", Description: "CLI application powered by Cobra and Bubbletea"},
+	}
 }
 
 func initCreateModel() CreateModel {
 	return CreateModel{
-		choices: map[int]Choice{
-			1: {label: "API server", value: "api"},
-			2: {label: "Fullstack Application", value: "app"},
-			3: {label: "CLI Application", value: "cli"},
-		},
+		choices:  GetProjectTypes(),
+		cursor:   0,
+		selected: 0,
 	}
 }
 
@@ -58,17 +71,15 @@ func (createModel CreateModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				createModel.cursor++
 			}
 		case tea.KeySpace.String():
-			_, ok := createModel.choices[createModel.cursor]
-			if ok {
+			projectType := createModel.choices[createModel.cursor]
+			if projectType.Command != "" && projectType.Description != "" {
 				createModel.selected = createModel.cursor
 			} else {
 				createModel.cursor = 0
 			}
 		case tea.KeyEnter.String():
-			if createModel.selected != 0 {
-				fmt.Printf("Selected option: %v", createModel.choices[createModel.selected])
-				appCmd.Execute()
-			}
+			fmt.Printf("Selected option: %v", createModel.choices[createModel.selected])
+			appCmd.Execute()
 		}
 	}
 	return createModel, nil
@@ -77,7 +88,7 @@ func (createModel CreateModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 func (createModel CreateModel) View() string {
 	view := "\nWhat type of project are you starting?\n\n"
 
-	for i, choice := range createModel.choices {
+	for i, projectType := range createModel.choices {
 		cursor := " "
 		if createModel.cursor == i {
 			cursor = ">"
@@ -88,7 +99,7 @@ func (createModel CreateModel) View() string {
 			checked = "x"
 		}
 
-		view += fmt.Sprintf("%s [%s] %s\n", cursor, checked, choice.label)
+		view += fmt.Sprintf("%s [%s] %s\n", cursor, checked, projectType.Command)
 	}
 
 	view += "\nPress Ctrl-C or q to quit.\n"
@@ -96,16 +107,6 @@ func (createModel CreateModel) View() string {
 	return view
 }
 
-func runCreate() {
-	p := tea.NewProgram(initCreateModel())
-	if _, err := p.Run(); err != nil {
-		fmt.Printf("Error running program: %v", err)
-		os.Exit(1)
-	}
-}
-
 func init() {
-	createCmd.AddCommand(appCmd)
-	createCmd.AddCommand(cliCmd)
-	createCmd.AddCommand(serverCmd)
+	model = initCreateModel()
 }
