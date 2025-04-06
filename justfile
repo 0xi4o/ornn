@@ -8,14 +8,14 @@ default:
 # Build the project
 build:
     @echo "Building ornn..."
-    go build ./...
+    go build .
     @echo "Done."
 
 
 # Format the project
 fmt:
     @echo "Formatting..."
-    go fmt ./...
+    go fmt .
     @echo "Done."
 
 # Run tidy
