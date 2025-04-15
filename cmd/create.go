@@ -2,7 +2,6 @@ package cmd
 
 import (
 	"fmt"
-	"os"
 
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/spf13/cobra"
@@ -26,11 +25,12 @@ var (
 		// Args:      cobra.MatchAll(cobra.ExactArgs(1), cobra.OnlyValidArgs),
 		// ValidArgs: []string{"app", "cli", "server"},
 		Run: func(cmd *cobra.Command, args []string) {
-			p := tea.NewProgram(model)
-			if _, err := p.Run(); err != nil {
-				fmt.Printf("Error running program: %v", err)
-				os.Exit(1)
-			}
+			// p := tea.NewProgram(model)
+			// if _, err := p.Run(); err != nil {
+			// 	fmt.Printf("Error running program: %v", err)
+			// 	os.Exit(1)
+			// }
+			cmd.Usage()
 		},
 	}
 	model CreateModel
@@ -108,5 +108,6 @@ func (createModel CreateModel) View() string {
 }
 
 func init() {
-	model = initCreateModel()
+	// model = initCreateModel()
+	createCmd.AddCommand(appCmd)
 }
